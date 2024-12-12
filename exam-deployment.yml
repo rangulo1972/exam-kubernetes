@@ -1,0 +1,67 @@
+# creación del NameSpace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: roberto-angulo
+---
+# creación del Configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-exam
+  namespace: roberto-angulo
+data:
+  MENSAJE: "Mensaje sobre este curso"
+---
+# creación del Secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-exam
+  namespace: roberto-angulo
+type: Opaque
+data:
+  apellido-paterno: YW5ndWxv
+  apellido-materno: dmFzcXVleg==
+---
+# creación del deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-exam
+  namespace: roberto-angulo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: proyecto-exam
+  template:
+    metadata:
+      labels:
+        app: proyecto-exam
+    spec:
+      containers:
+        - name: container-exam
+          image: rangulo1972/scale-flask
+          envFrom:
+            - configMapRef:
+                name: config-exam
+            - secretRef:
+                name: secret-exam
+          ports:
+            - containerPort: 80
+---
+# creación del service
+apiVersion: v1
+kind: Service
+metadata:
+  name: exam-kubernetes
+  namespace: roberto-angulo
+spec:
+  selector:
+    app: proyecto-exam
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer #ClusterIP para suar el service "Ingress
